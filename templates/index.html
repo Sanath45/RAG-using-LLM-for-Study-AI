@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/x-icon">
+    <!-- Add MathJax for mathematical formula rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" style="width: 40px; height: auto;">
+            </div>
+            <button class="icon-button" id="chatButton">
+                <span class="material-symbols-outlined">forum</span>
+            </button>
+            <button class="icon-button" id="filesButton">
+                <span class="material-symbols-outlined">description</span>
+            </button>
+            <button class="icon-button" id="historyButton">
+                <span class="material-symbols-outlined">history</span>
+            </button>
+            <button class="icon-button" id="mcqButton" title="MCQ Tests">
+                <span class="material-symbols-outlined">quiz</span>
+            </button>
+            <button class="icon-button" id="clearMemoryButton" title="Clear Conversation Memory">
+                <span class="material-symbols-outlined">refresh</span>
+            </button>
+            <div class="spacer"></div>
+            <a href="{{ url_for('logout') }}" class="icon-button" id="logoutButton" title="Logout">
+                <span class="material-symbols-outlined">logout</span>
+            </a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header (will be hidden in documents view) -->
+            <div class="header" id="mainHeader">
+                <div class="header-content">
+                    <div class="icon-container">
+                        <span class="material-symbols-outlined">school</span>
+                    </div>
+                    <button id="newChatButton" class="new-chat-button">
+                        <span class="material-symbols-outlined">add</span>
+                        New Chat
+                    </button>
+                </div>
+                <h1>Academic Study Assistant</h1>
+                <p>Your research and study companion for academic excellence</p>
+                
+                <!-- Subject selection pills -->
+                <div class="quick-actions">
+                    <p>Select a subject:</p>
+                    <div class="button-group subject-selection">
+                        <button class="pill-button subject-pill" data-subject="Mathematics">Mathematics</button>
+                        <button class="pill-button subject-pill" data-subject="Physics">Physics</button>
+                        <button class="pill-button subject-pill" data-subject="Computer Science">Computer Science</button>
+                        <button class="pill-button subject-pill" data-subject="Literature">Literature</button>
+                        <button class="pill-button subject-pill" data-subject="History">History</button>
+                        <button class="pill-button subject-pill" data-subject="Economics">Economics</button>
+                        <button class="pill-button subject-pill" data-subject="Biology">Biology</button>
+                        <button class="pill-button subject-pill" data-subject="Chemistry">Chemistry</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Section -->
+            <div id="chatSection" class="section active">
+                <div id="chatMessages" class="chat-messages"></div>
+            </div>
+
+            <!-- Documents Section -->
+            <div id="documentsSection" class="section">
+                <div class="docs-container">
+                    <div class="upload-area">
+                        <div id="dropzone" class="dropzone">
+                            <div class="upload-icon">
+                                <span class="material-symbols-outlined">cloud_upload</span>
+                            </div>
+                            <h3>Upload Study Materials</h3>
+                            <p>Drag & drop PDF files here or</p>
+                            <input type="file" id="fileInput" accept=".pdf" style="display: none">
+                            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                                <span class="material-symbols-outlined">upload_file</span>
+                                Choose File
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="filesContainer" class="files-container">
+                        <div class="files-header">
+                            <h3>Your Study Materials</h3>
+                        </div>
+                        <div id="loadedFiles" class="files-grid"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- MCQ Test Section -->
+            <div id="mcqSection" class="section">
+                <div class="mcq-container">
+                    <div class="mcq-header">
+                        <h2>Generate MCQ Test</h2>
+                        <p>Test your knowledge on any subject with auto-generated multiple choice questions</p>
+                    </div>
+                    
+                    <div class="mcq-form">
+                        <div class="form-group">
+                            <label for="mcqSubject">Subject or Topic</label>
+                            <input type="text" id="mcqSubject" placeholder="Enter subject (e.g., Quantum Physics, Machine Learning)">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="numQuestions">Number of Questions</label>
+                            <select id="numQuestions">
+                                <option value="5">5 Questions</option>
+                                <option value="10" selected>10 Questions</option>
+                                <option value="15">15 Questions</option>
+                                <option value="20">20 Questions</option>
+                            </select>
+                        </div>
+                        
+                        <button id="mcqSubjectSubmit" class="mcq-btn">
+                            <span class="material-symbols-outlined">quiz</span>
+                            Generate Test
+                        </button>
+                    </div>
+                    
+                    <!-- MCQ Test Area (Hidden initially) -->
+                    <div id="mcqTestArea" class="mcq-test-area" style="display: none;">
+                        <div class="mcq-test-header">
+                            <h3 id="mcqTestSubject">Subject Test</h3>
+                            <p>Select the best answer for each question</p>
+                        </div>
+                        
+                        <div id="mcqQuestions" class="mcq-questions"></div>
+                        
+                        <div class="mcq-actions">
+                            <button id="submitMcqButton" class="mcq-submit-btn">Submit Test</button>
+                            <button id="resetMcqButton" class="mcq-reset-btn">Reset</button>
+                        </div>
+                    </div>
+                    
+                    <!-- MCQ Results Area (Hidden initially) -->
+                    <div id="mcqResultsArea" class="mcq-results-area" style="display: none;">
+                        <div class="mcq-results-header">
+                            <h3>Test Results</h3>
+                        </div>
+                        
+                        <div class="mcq-score-card">
+                            <div class="mcq-score">
+                                <span id="scorePercentage">0%</span>
+                                <span class="mcq-score-label">Score</span>
+                            </div>
+                            <div id="scoreMessage" class="mcq-score-message"></div>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <canvas id="mcqResultChart"></canvas>
+                        </div>
+                        
+                        <div id="mcqResultDetails" class="mcq-result-details"></div>
+                        
+                        <div class="mcq-actions">
+                            <button id="newMcqButton" class="mcq-btn">New Test</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area with Content Type Selector -->
+        <div class="input-area">
+            <div class="input-options">
+                <select id="contentTypeSelector" title="Content Type">
+                    <option value="general">General</option>
+                    <option value="math">Mathematics</option>
+                    <option value="literature">Literature</option>
+                    <option value="science">Science</option>
+                    <option value="research">Research</option>
+                    <option value="summary">Summary</option>
+                </select>
+                
+                <select id="modeSelector" title="Knowledge Mode">
+                    <option value="auto">Auto</option>
+                    <option value="document">Document Only</option>
+                    <option value="general">General Knowledge</option>
+                </select>
+            </div>
+            <div class="text-input-container">
+                <textarea id="messageInput" class="message-input" placeholder="Ask any academic question..." rows="1"></textarea>
+                <button class="send-button" id="sendButton">➤</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Chat History Sidebar -->
+    <div id="historySidebar" class="history-sidebar">
+        <div class="history-header">
+            <h3>Chat History</h3>
+            <button id="closeHistoryBtn" class="close-btn">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="history-content">
+            <div id="historyList" class="history-list">
+                <!-- History items will be populated by JavaScript -->
+            </div>
+            <div id="historyEmpty" class="history-empty">
+                <span class="material-symbols-outlined">history</span>
+                <p>No chat history yet</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none">
+        <div class="loading-spinner"></div>
+        <p id="loadingText">Processing...</p>
+    </div>
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/mcq.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
+
